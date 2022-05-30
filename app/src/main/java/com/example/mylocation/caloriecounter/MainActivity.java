@@ -1,5 +1,9 @@
 package com.example.mylocation.caloriecounter;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -17,11 +21,16 @@ import com.example.mylocation.caloriecounter.databinding.ActivityMainBinding;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
+    Context context;
+    BroadcastReceiver updateUIReciver;
+    double steps=0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +52,28 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        Intent i = new Intent(MainActivity.this, StepCounterService.class);
+        startService(i);
+        context = this;
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("service.to.activity.transfer");
+        updateUIReciver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //UI update here
+                if (intent != null){
+                    steps=Double.parseDouble(intent.getStringExtra("steps"));
+                    ((TextView) findViewById(R.id.textview_first)).setText(Double.toString(steps));
+                }
+            }
+        };
+        registerReceiver(updateUIReciver, filter);
+
+
+
+
     }
 
     @Override

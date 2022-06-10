@@ -4,10 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
@@ -30,8 +32,10 @@ public class MainActivity extends AppCompatActivity {
     Context context;
     BroadcastReceiver updateUIReciver;
     double steps=0;
+    double cals=0;
 
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,27 +49,23 @@ public class MainActivity extends AppCompatActivity {
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         Intent i = new Intent(MainActivity.this, StepCounterService.class);
         startService(i);
         context = this;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("service.to.activity.transfer");
-        updateUIReciver = new BroadcastReceiver() {
+        updateUIReciver = new BroadcastReceiver(){
             @Override
             public void onReceive(Context context, Intent intent) {
                 //UI update here
                 if (intent != null){
                     steps=Double.parseDouble(intent.getStringExtra("steps"));
-                    ((TextView) findViewById(R.id.textview_first)).setText(Double.toString(steps));
+                    cals=Double.parseDouble(intent.getStringExtra("cals"));
+
+                    ((TextView) findViewById(R.id.textview_calories)).setText("Calories burned : "+Double.toString(cals));
+                    ((TextView) findViewById(R.id.textview_steps)).setText("Steps taken : "+Double.toString(steps));
+
                 }
             }
         };
